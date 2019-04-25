@@ -52,7 +52,7 @@ namespace Marten.Linq.Parsing
 
             if (valueToQuery == null)
             {
-                return new WhereFragment($"({locator}) {_isOperator} null");
+                return new WhereFragment($"({field.RawLocator}) {_isOperator} null");
             }
 
             if (valueToQuery.GetType() != expression.Method.DeclaringType)

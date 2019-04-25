@@ -55,17 +55,19 @@ namespace Marten.Linq.Parsing
 				value = field.GetValueForCompiledQueryParameter(valueExpression);
 	        }
 
-	        var jsonLocator = field.TypedLocator;
+	        
 
 
             if (value == null)
             {
                 var sql = expression.NodeType == ExpressionType.NotEqual
-                    ? $"({jsonLocator}) is not null"
-                    : $"({jsonLocator}) {_isOperator} null";
+                    ? $"({field.RawLocator}) is not null"
+                    : $"({field.RawLocator}) {_isOperator} null";
 
                 return new WhereFragment(sql);
             }
+            
+            var jsonLocator = field.TypedLocator;
 
             var op = _operators[expression.NodeType];
 

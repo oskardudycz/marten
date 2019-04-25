@@ -82,8 +82,6 @@ namespace Marten.Testing.Linq
 			{
 				new object[] { Guid.NewGuid() },
 				new object[] { 0 },
-				new object[] { null },
-				new object[] { false },
 				new object[] { 32m },
 				new object[] { 0L },
 				new object[] { DateTime.UtcNow },

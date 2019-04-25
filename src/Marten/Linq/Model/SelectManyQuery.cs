@@ -105,7 +105,7 @@ namespace Marten.Linq.Model
 
         public string RawChildElementField()
         {
-            return $"jsonb_array_elements({_field.TypedLocator}) as x";
+            return $"jsonb_array_elements({_field.RawLocator}) as x";
         }
 
         public bool HasSelectTransform()
