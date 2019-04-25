@@ -90,17 +90,6 @@ namespace Marten
                 _parent.alter = options => options.Storage.MappingFor(typeof(T));
             }
 
-            /// <summary>
-            /// Specify the property searching mechanism for this document type. The default is
-            /// JSON_Locator_Only
-            /// </summary>
-            /// <param name="searching"></param>
-            /// <returns></returns>
-            public DocumentMappingExpression<T> PropertySearching(PropertySearching searching)
-            {
-                alter = m => m.PropertySearching = searching;
-                return this;
-            }
 
             /// <summary>
             /// Override the Postgresql schema alias for this document type in order

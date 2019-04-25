@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Baseline;
 using Marten.Events;
+using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
@@ -365,6 +366,8 @@ namespace Marten
                 return ForAllDocuments(_ => _.TenancyStyle = TenancyStyle.Conjoined);
             }
         }
+        
+        public readonly IList<IFieldSource> FieldSources = new List<IFieldSource>();
     }
 
     public interface IDocumentPolicy

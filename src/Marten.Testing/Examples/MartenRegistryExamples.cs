@@ -41,20 +41,6 @@ namespace Marten.Testing.Examples
 
     // ENDSAMPLE
 
-    // SAMPLE: using_attributes_on_document
-    [PropertySearching(PropertySearching.ContainmentOperator)]
-    public class Employee
-    {
-        public int Id;
-
-        // You can optionally override the Postgresql
-        // type for the duplicated column in the document
-        // storage table
-        [DuplicateField(PgType = "text")]
-        public string Category;
-    }
-
-    // ENDSAMPLE
 
     // SAMPLE: IndexExamples
     public class IndexExamples : MartenRegistry

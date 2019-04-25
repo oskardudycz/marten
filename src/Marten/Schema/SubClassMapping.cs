@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Baseline;
 using Marten.Linq;
+using Marten.Linq.Fields;
 using Marten.Schema.Hierarchies;
 using Marten.Schema.Identity;
 using Marten.Services.Includes;
@@ -73,24 +75,33 @@ namespace Marten.Schema
             get { throw new NotImplementedException(); }
         }
 
-        public PropertySearching PropertySearching => Parent.PropertySearching;
 
         public string[] SelectFields()
         {
             return new[] {"data", "id", DocumentMapping.DocumentTypeColumn, DocumentMapping.VersionColumn };
         }
 
-        public IField FieldFor(IEnumerable<MemberInfo> members)
+        public IField FieldFor(MemberInfo[] members)
         {
             return Parent.FieldFor(members) ?? _inner.FieldFor(members);
+        }
+
+        public IField FieldFor(MemberInfo member)
+        {
+            return Parent.FieldFor(member) ?? _inner.FieldFor(member);
+        }
+
+        public IField FieldFor(Expression expression)
+        {
+            return Parent.FieldFor(expression) ?? _inner.FieldFor(expression);
         }
 
         public IWhereFragment FilterDocuments(QueryModel model, IWhereFragment query)
         {
             var extras = extraFilters(query).ToArray();
 
-			var extraCoumpound = new CompoundWhereFragment("and", extras);
-			return new CompoundWhereFragment("and", query, extraCoumpound);
+			var extraCompound = new CompoundWhereFragment("and", extras);
+			return new CompoundWhereFragment("and", query, extraCompound);
         }
 
         private IEnumerable<IWhereFragment> extraFilters(IWhereFragment query)

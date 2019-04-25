@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Baseline;
+using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Storage;
 using Marten.Testing.Documents;
@@ -18,13 +19,6 @@ namespace Marten.Testing
             var store = TestingDocumentStore.For(_ => _.Schema.Include<TestRegistry>());
 
             theStorage = store.Storage;
-        }
-
-        [Fact]
-        public void property_searching_override()
-        {
-            theStorage.MappingFor(typeof(User)).As<DocumentMapping>()
-                .PropertySearching.ShouldBe(PropertySearching.JSON_Locator_Only);
         }
 
         [Fact]
@@ -74,12 +68,6 @@ namespace Marten.Testing
             index.Expression.ShouldBe("? jsonb_path_ops");
         }
 
-        [Fact]
-        public void mapping_is_set_to_containment_if_gin_index_is_added()
-        {
-            var mapping = theStorage.MappingFor(typeof(Organization)).As<DocumentMapping>();
-            mapping.PropertySearching.ShouldBe(PropertySearching.ContainmentOperator);
-        }
 
         [Fact]
         public void mt_last_modified_index_is_added()
@@ -115,7 +103,6 @@ namespace Marten.Testing
                     .IndexLastModified(x => x.IsConcurrent = true)
                     .SoftDeletedWithIndex(x => x.Method = IndexMethod.brin);
 
-                For<User>().PropertySearching(PropertySearching.JSON_Locator_Only);
             }
         }
 

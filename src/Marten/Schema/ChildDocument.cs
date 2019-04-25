@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Marten.Linq;
+using Marten.Linq.Fields;
 using Marten.Services.Includes;
 using Remotion.Linq;
 
@@ -36,7 +37,6 @@ namespace Marten.Schema
             return new[] { "x" };
         }
 
-        public PropertySearching PropertySearching { get; } = PropertySearching.JSON_Locator_Only;
 
         public DbObjectName Table
         {

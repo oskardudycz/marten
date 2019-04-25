@@ -139,14 +139,13 @@ namespace Marten.Linq
 
         private IWhereFragment buildChildCollectionQuery(IQueryableDocument mapping, QueryModel query, Expression valueExpression, string op)
         {
-            var members = FindMembers.Determine(query.MainFromClause.FromExpression);
-            var field = mapping.FieldFor(members);
+            var field = mapping.FieldFor(query.MainFromClause.FromExpression);
 
             if (query.HasOperator<CountResultOperator>())
             {
-                var value = field.GetValue(valueExpression);
+                var value = field.GetValueForCompiledQueryParameter(valueExpression);
 
-                return new WhereFragment($"jsonb_array_length({field.SqlLocator}) {op} ?", value);
+                return new WhereFragment($"jsonb_array_length({field.JSONBLocator}) {op} ?", value);
             }
 
             throw new NotSupportedException("Marten does not yet support this type of Linq query against child collections");

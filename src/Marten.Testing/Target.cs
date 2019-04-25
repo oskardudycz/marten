@@ -97,7 +97,7 @@ namespace Marten.Testing
             Id = Guid.NewGuid();
             StringDict = new Dictionary<string, string>();
         }
-
+        
         public Guid Id { get; set; }
 
         public int Number { get; set; }

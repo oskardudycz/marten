@@ -56,5 +56,6 @@ namespace Marten.Testing
             }
 
         }
+
     }
 }

@@ -101,15 +101,9 @@ namespace Marten.Testing.Linq
 			}
 		}
 
-		[Theory]
-		[InlineData(PropertySearching.ContainmentOperator)]
-		[InlineData(PropertySearching.JSON_Locator_Only)]
-		public void NotEqualsGeneratesSameSqlAsNotEqualityOperatorWhenRegardlessOfPropertySearching(PropertySearching search)
+		[Fact]
+		public void NotEqualsGeneratesSameSqlAsNotEqualityOperatorWhenRegardlessOfPropertySearching()
 		{
-			StoreOptions(options =>
-			{
-				options.Schema.For<QueryTarget>().PropertySearching(search);
-			});
 
 			var queryTarget = new QueryTarget
 			{

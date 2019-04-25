@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
+using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Services;
@@ -51,16 +53,25 @@ namespace Marten.Events
         public DuplicatedField[] DuplicatedFields { get; }
         public DeleteStyle DeleteStyle { get; }
 
-        public PropertySearching PropertySearching { get; } = PropertySearching.JSON_Locator_Only;
 
         public string[] SelectFields()
         {
             return new[] {"id", "data"};
         }
 
-        public IField FieldFor(IEnumerable<MemberInfo> members)
+        public IField FieldFor(MemberInfo[] members)
         {
             return _inner.FieldFor(members);
+        }
+
+        public IField FieldFor(MemberInfo member)
+        {
+            return _inner.FieldFor(member);
+        }
+
+        public IField FieldFor(Expression expression)
+        {
+            return _inner.FieldFor(expression);
         }
 
         public IWhereFragment FilterDocuments(QueryModel model, IWhereFragment query)

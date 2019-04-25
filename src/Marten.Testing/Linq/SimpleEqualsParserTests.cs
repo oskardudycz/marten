@@ -101,16 +101,9 @@ namespace Marten.Testing.Linq
 			}
 		}
 
-		[Theory]
-		[InlineData(PropertySearching.ContainmentOperator)]
-		[InlineData(PropertySearching.JSON_Locator_Only)]
-		public void EqualsGeneratesSameSqlAsEqualityOperatorWhenRegardlessOfPropertySearching(PropertySearching search)
+		[Fact]
+		public void EqualsGeneratesSameSqlAsEqualityOperatorWhenRegardlessOfPropertySearching()
 		{
-			StoreOptions(options =>
-			{
-				options.Schema.For<QueryTarget>().PropertySearching(search);
-			});
-
 			var queryTarget = new QueryTarget
 			{
 				IntProp = 1,

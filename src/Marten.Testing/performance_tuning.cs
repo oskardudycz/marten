@@ -306,7 +306,7 @@ public class DateIsSearchable : MartenRegistry
             public JsonLocatorOnly()
             {
                 // This can also be done with attributes
-                For<Target>().GinIndexJsonData().PropertySearching(PropertySearching.JSON_Locator_Only);
+                For<Target>().GinIndexJsonData();
             }
         }
 
@@ -318,12 +318,7 @@ public class ContainmentOperator : MartenRegistry
         For<Target>()
 
             // Use a gin index against the json data field
-            .GinIndexJsonData()
-
-            // directs Marten to try to use the containment
-            // operator for querying against this document type
-            // in the Linq support
-            .PropertySearching(PropertySearching.ContainmentOperator);
+            .GinIndexJsonData();
     }
 }
 

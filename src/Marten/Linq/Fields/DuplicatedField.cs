@@ -3,13 +3,12 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Baseline;
 using Baseline.Reflection;
-using Marten.Linq;
 using Marten.Schema.Arguments;
 using Marten.Storage;
 using Marten.Util;
 using NpgsqlTypes;
 
-namespace Marten.Schema
+namespace Marten.Linq.Fields
 {
     public class DuplicatedField : Field, IField
     {
@@ -22,7 +21,7 @@ namespace Marten.Schema
             ColumnName = MemberName.ToTableAlias();
             this.useTimestampWithoutTimeZoneForDateTime = useTimestampWithoutTimeZoneForDateTime;
 
-            if (MemberType.IsEnum)
+            if (FieldType.IsEnum)
             {
                 if (enumStorage == EnumStorage.AsString)
                 {
@@ -32,7 +31,7 @@ namespace Marten.Schema
                     _parseObject = expression =>
                     {
                         var raw = expression.Value();
-                        return Enum.GetName(MemberType, raw);
+                        return Enum.GetName(FieldType, raw);
                     };
                 }
                 else
@@ -41,19 +40,19 @@ namespace Marten.Schema
                     PgType = "integer";
                 }
             }
-            else if (MemberType.IsDateTime())
+            else if (FieldType.IsDateTime())
             {
                 PgType = this.useTimestampWithoutTimeZoneForDateTime ? "timestamp without time zone" : "timestamp with time zone";
                 DbType = this.useTimestampWithoutTimeZoneForDateTime ? NpgsqlDbType.Timestamp : NpgsqlDbType.TimestampTz;
             }
-            else if (MemberType == typeof(DateTimeOffset) || MemberType == typeof(DateTimeOffset?))
+            else if (FieldType == typeof(DateTimeOffset) || FieldType == typeof(DateTimeOffset?))
             {
                 PgType = "timestamp with time zone";
                 DbType = NpgsqlDbType.TimestampTz;
             }
             else
             {
-                DbType = TypeMappings.ToDbType(MemberType);
+                DbType = TypeMappings.ToDbType(FieldType);
             }
         }
 
@@ -63,7 +62,6 @@ namespace Marten.Schema
         /// </summary>
         public NpgsqlDbType DbType { get; set; }
 
-        public DuplicatedFieldRole Role { get; set; } = DuplicatedFieldRole.Search;
 
         public UpsertArgument UpsertArgument => new UpsertArgument
         {
@@ -74,7 +72,7 @@ namespace Marten.Schema
             DbType = DbType
         };
 
-        public string SelectionLocator => SqlLocator;
+        public string RawLocator => TypedLocator;
 
         public string ColumnName
         {
@@ -82,43 +80,34 @@ namespace Marten.Schema
             set
             {
                 _columnName = value;
-                SqlLocator = "d." + _columnName;
+                TypedLocator = "d." + _columnName;
             }
         }
-
-        public void WritePatch(DocumentMapping mapping, SchemaPatch patch)
-        {
-            patch.Updates.Apply(mapping, $"ALTER TABLE {mapping.Table.QualifiedName} ADD COLUMN {ColumnName} {PgType.Trim()};");
-
-            patch.UpWriter.WriteLine($"update {mapping.Table.QualifiedName} set {UpdateSqlFragment()};");
-        }
+        
+        internal IField MatchingNonDuplicatedField { get; set; }
 
         // TODO -- have this take in CommandBuilder
         public string UpdateSqlFragment()
         {
-            var jsonField = new JsonLocatorField("d.data", _enumStorage, Casing.Default, Members);
             // HOKEY, but I'm letting it pass for now.
-            var sqlLocator = jsonField.SqlLocator.Replace("d.", "");
+            var sqlLocator = MatchingNonDuplicatedField.TypedLocator.Replace("d.", "");
 
             return $"{ColumnName} = {sqlLocator}";
         }
 
-        public object GetValue(Expression valueExpression)
+        public object GetValueForCompiledQueryParameter(Expression valueExpression)
         {
             return _parseObject(valueExpression);
         }
 
-        public bool ShouldUseContainmentOperator()
-        {
-            return false;
-        }
+        public string JSONBLocator { get; set; }
 
         public string LocatorFor(string rootTableAlias)
         {
             return $"{rootTableAlias}.{_columnName}";
         }
 
-        public string SqlLocator { get; set; }
+        public string TypedLocator { get; set; }
 
         public static DuplicatedField For<T>(EnumStorage enumStorage, Expression<Func<T, object>> expression, bool useTimestampWithoutTimeZoneForDateTime = true)
         {

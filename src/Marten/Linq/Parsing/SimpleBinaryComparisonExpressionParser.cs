@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using Baseline;
+using Marten.Linq.Fields;
 using Marten.Schema;
 
 namespace Marten.Linq.Parsing
@@ -38,36 +40,22 @@ namespace Marten.Linq.Parsing
             var jsonLocatorExpression = isValueExpressionOnRight ? expression.Left : expression.Right;
             var valueExpression = isValueExpressionOnRight ? expression.Right : expression.Left;
 
-            var members = FindMembers.Determine(jsonLocatorExpression);
-
-            var field = mapping.FieldFor(members);
+            var field = mapping.FieldFor(jsonLocatorExpression);
 
 	        object value;
 
 	        if (valueExpression is MemberExpression memberAccess)
 	        {
-		        var membersOther = FindMembers.Determine(memberAccess);
-		        var fieldOther = mapping.FieldFor(membersOther);
-		        value = fieldOther.SqlLocator;
+		        var fieldOther = mapping.FieldFor(memberAccess);
+		        value = fieldOther.TypedLocator;
 	        }
 	        else
 	        {
 		        memberAccess = null;
-				value = field.GetValue(valueExpression);
+				value = field.GetValueForCompiledQueryParameter(valueExpression);
 	        }
 
-	        var jsonLocator = field.SqlLocator;
-
-            var useContainment = mapping.PropertySearching == PropertySearching.ContainmentOperator || field.ShouldUseContainmentOperator();
-
-            var isDuplicated = (mapping.FieldFor(members) is DuplicatedField);
-            var isEnumString = field.MemberType.GetTypeInfo().IsEnum && serializer.EnumStorage == EnumStorage.AsString;
-
-            if (useContainment &&
-                expression.NodeType == ExpressionType.Equal && value != null && !isDuplicated && !isEnumString)
-            {
-                return new ContainmentWhereFragment(serializer, expression, _wherePrefix);
-            }
+	        var jsonLocator = field.TypedLocator;
 
 
             if (value == null)

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using Marten.Linq;
+using Marten.Linq.Fields;
 using Marten.Services.Includes;
 using Remotion.Linq;
 
@@ -15,11 +17,13 @@ namespace Marten.Schema
 
         IncludeJoin<TOther> JoinToInclude<TOther>(JoinType joinType, IQueryableDocument other, MemberInfo[] members, Action<TOther> callback);
 
-        IField FieldFor(IEnumerable<MemberInfo> members);
+        IField FieldFor(MemberInfo[] members);
+        
+        IField FieldFor(MemberInfo member);
+
+        IField FieldFor(Expression expression);
 
         string[] SelectFields();
-
-        PropertySearching PropertySearching { get; }
 
         DbObjectName Table { get; }
 

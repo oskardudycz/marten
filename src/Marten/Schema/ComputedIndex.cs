@@ -23,10 +23,10 @@ namespace Marten.Schema
         {
             _members = members;
 
-            var mebersLocator = members
+            var membersLocator = members
                     .Select(m =>
                     {
-                        var sql = mapping.FieldFor(m).SqlLocator.Replace("d.", "");
+                        var sql = mapping.FieldFor(m).TypedLocator.Replace("d.", "");
                         switch (Casing)
                         {
                             case Casings.Upper:
@@ -41,7 +41,7 @@ namespace Marten.Schema
                     })
                     .Join(",");
 
-            _locator = $" {mebersLocator}";
+            _locator = $" {membersLocator}";
 
             _table = mapping.Table;
         }

@@ -30,13 +30,9 @@ namespace Marten.Schema
     {
         public static string JsonLocator(this IQueryableDocument mapping, Expression expression)
         {
-            var visitor = new FindMembers();
-            visitor.Visit(expression);
+            var field = mapping.FieldFor(expression);
 
-
-            var field = mapping.FieldFor(visitor.Members);
-
-            return field.SqlLocator;
+            return field.TypedLocator;
         }
     }
 }

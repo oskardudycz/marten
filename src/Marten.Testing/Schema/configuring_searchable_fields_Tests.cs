@@ -67,7 +67,6 @@ namespace Marten.Testing.Schema
                 .PgType.ShouldBe("timestamp");
         }
 
-        [PropertySearching(PropertySearching.JSON_Locator_Only)]
         public class Organization
         {
             public Guid Id { get; set; }

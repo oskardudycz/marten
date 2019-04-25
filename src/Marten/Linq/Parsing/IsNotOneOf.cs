@@ -19,12 +19,11 @@ namespace Marten.Linq.Parsing
 
         public IWhereFragment Parse(IQueryableDocument mapping, ISerializer serializer, MethodCallExpression expression)
         {
-            var members = FindMembers.Determine(expression);
-
-            var locator = mapping.FieldFor(members).SqlLocator;
+            var field = mapping.FieldFor(expression);
+            var locator = field.TypedLocator;
             var values = expression.Arguments.Last().Value();
 
-            if (members.Last().GetMemberType().IsEnum)
+            if (field.FieldType.IsEnum)
             {
                 return new EnumIsNotOneOfWhereFragment(values, serializer.EnumStorage, locator);
             }

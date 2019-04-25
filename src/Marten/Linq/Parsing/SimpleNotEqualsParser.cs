@@ -8,7 +8,7 @@ namespace Marten.Linq.Parsing
 	/// <remarks>Equals(object) calls into <see cref="Convert.ChangeType(object, Type)"/>. Equals(null) is converted to "is null" query.</remarks>
 	public sealed class SimpleNotEqualsParser : SimpleEqualsParser
 	{
-		public SimpleNotEqualsParser() : base("!=", "is not", false)
+		public SimpleNotEqualsParser() : base("!=", "is not")
 		{
 			
 		}

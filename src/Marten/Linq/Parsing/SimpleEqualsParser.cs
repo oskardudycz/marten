@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Baseline;
+using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Util;
 
@@ -20,7 +21,6 @@ namespace Marten.Linq.Parsing
 
         private readonly string _equalsOperator;
         private readonly string _isOperator;
-        private readonly bool _supportContainment;
 
         static SimpleEqualsParser()
         {
@@ -28,11 +28,10 @@ namespace Marten.Linq.Parsing
             SupportedTypes.AddRange(TypeMappings.ResolveTypes(NpgsqlTypes.NpgsqlDbType.TimestampTz));
         }
 
-        public SimpleEqualsParser(string equalsOperator = "=", string isOperator = "is", bool supportContainment = true)
+        public SimpleEqualsParser(string equalsOperator = "=", string isOperator = "is")
         {
             _equalsOperator = equalsOperator;
             _isOperator = isOperator;
-            _supportContainment = supportContainment;
         }
 
         public bool Matches(MethodCallExpression expression)
@@ -44,7 +43,7 @@ namespace Marten.Linq.Parsing
         public IWhereFragment Parse(IQueryableDocument mapping, ISerializer serializer, MethodCallExpression expression)
         {
             var field = GetField(mapping, expression);
-            var locator = field.SqlLocator;
+            var locator = field.TypedLocator;
 
             var value = expression.Arguments.OfType<ConstantExpression>().FirstOrDefault();
             if (value == null) throw new BadLinqExpressionException("Could not extract value from {0}.".ToFormat(expression), null);
@@ -68,16 +67,7 @@ namespace Marten.Linq.Parsing
                         $"Could not convert {value.Value.GetType().FullName} to {expression.Method.DeclaringType}", e);
                 }
             }
-
-            if (_supportContainment && ((mapping.PropertySearching == PropertySearching.ContainmentOperator ||
-                                         field.ShouldUseContainmentOperator()) &&
-                                        !(field is DuplicatedField)))
-            {
-                var dict = new Dictionary<string, object>();
-                ContainmentWhereFragment.CreateDictionaryForSearch(dict, expression, valueToQuery, serializer);
-                return new ContainmentWhereFragment(serializer, dict);
-            }
-
+    
             return new WhereFragment($"{locator} {_equalsOperator} ?", valueToQuery);
         }
 
@@ -85,11 +75,7 @@ namespace Marten.Linq.Parsing
         {
             IField GetField(Expression e)
             {
-                var visitor = new FindMembers();
-                visitor.Visit(e);
-
-                var field = mapping.FieldFor(visitor.Members);
-                return field;
+                return mapping.FieldFor(e);
             }
 
             if (!expression.Method.IsStatic && expression.Object != null && expression.Object.NodeType != ExpressionType.Constant)

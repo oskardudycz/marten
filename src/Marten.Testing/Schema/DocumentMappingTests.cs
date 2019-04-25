@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Baseline;
+using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
@@ -78,7 +79,6 @@ namespace Marten.Testing.Schema
             public Guid Id { get; set; }
         }
 
-        [PropertySearching(PropertySearching.JSON_Locator_Only)]
         public class Organization
         {
             [DuplicateField] public string OtherName;
@@ -158,13 +158,6 @@ namespace Marten.Testing.Schema
         {
             var mapping = DocumentMapping.For<User>();
             mapping.Alias.ShouldBe("user");
-        }
-
-        [Fact]
-        public void default_search_mode_is_jsonb_to_record()
-        {
-            var mapping = DocumentMapping.For<User>();
-            mapping.PropertySearching.ShouldBe(PropertySearching.JSON_Locator_Only);
         }
 
         [Fact]
@@ -344,10 +337,10 @@ namespace Marten.Testing.Schema
         public void get_the_sql_locator_for_the_Id_member()
         {
             DocumentMapping.For<User>().FieldFor("Id")
-                .SqlLocator.ShouldBe("d.id");
+                .TypedLocator.ShouldBe("d.id");
 
             DocumentMapping.For<FieldId>().FieldFor("id")
-                .SqlLocator.ShouldBe("d.id");
+                .TypedLocator.ShouldBe("d.id");
         }
 
         [Fact]
@@ -483,13 +476,6 @@ namespace Marten.Testing.Schema
         }
 
         [Fact]
-        public void picks_up_marten_attibute_on_document_type()
-        {
-            var mapping = DocumentMapping.For<Organization>();
-            mapping.PropertySearching.ShouldBe(PropertySearching.JSON_Locator_Only);
-        }
-
-        [Fact]
         public void picks_up_searchable_attribute_on_fields()
         {
             var mapping = DocumentMapping.For<Organization>();
@@ -532,21 +518,6 @@ namespace Marten.Testing.Schema
             mapping.SelectFields().ShouldHaveTheSameElementsAs("data", "id", DocumentMapping.VersionColumn);
         }
 
-        [Fact]
-        public void switch_to_only_using_json_locator_fields()
-        {
-            var mapping = DocumentMapping.For<User>();
-
-            mapping.DuplicateField(nameof(User.FirstName));
-
-            mapping.PropertySearching = PropertySearching.JSON_Locator_Only;
-
-            mapping.FieldFor(nameof(User.LastName)).ShouldBeOfType<JsonLocatorField>();
-
-            // leave duplicates alone
-
-            mapping.FieldFor(nameof(User.FirstName)).ShouldBeOfType<DuplicatedField>();
-        }
 
         [Fact]
         public void table_name_for_document()
