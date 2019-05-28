@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ using Marten.Util;
 
 namespace MartenBenchmarks.BenchAgainst
 {
-    public class UnitOfWorkBaseline : IUnitOfWork
+    public class UnitOfWorkBaseline: IUnitOfWork
     {
         private readonly ConcurrentDictionary<Guid, EventStream> _events = new ConcurrentDictionary<Guid, EventStream>();
 
@@ -319,7 +319,7 @@ namespace MartenBenchmarks.BenchAgainst
 
         public IEnumerable<IStorageOperation> Operations()
         {
-            return _operations.Values.SelectMany(x => x);
+            return _operations.Values.AsEnumerable().SelectMany(x => x);
         }
 
         public IEnumerable<IStorageOperation> OperationsFor<T>()
